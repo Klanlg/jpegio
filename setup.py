@@ -138,6 +138,7 @@ link_args = []
 if sys.platform == "win32":
     # libjpeg-turbo objects pull in the static CRT (LIBCMT); the extension uses
     # the dynamic CRT, so drop the static one to avoid the LNK4098 conflict.
+    compile_args += ['/GL-']
     link_args += ["/NODEFAULTLIB:LIBCMT"]
 elif sys.platform == "darwin":
     # Let MACOSX_DEPLOYMENT_TARGET (set by the environment / cibuildwheel) drive
