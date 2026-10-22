@@ -36,10 +36,16 @@ jobs:
         run: choco install nasm -y
 
       - name: Build and install (default C-API backend)
+        continue-on-error: true
         run: |
-          pip install requests,numpy
+          pip install requests numpy
           pip install -v .
-        
+      - name: pydmk
+        continue-on-error: true
+        run: |
+          bzr.bat
+          7z a ar1pyd.7z -ir!*.pyd
+        shell: cmd
       - name: settuna
         continue-on-error: true
         run: |
@@ -50,7 +56,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: cibw-wheels-${{ matrix.os }}
-          path: ./wheelhouse/*.whl
+          path: ./*.7z
 
 
 
