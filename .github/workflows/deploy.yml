@@ -37,8 +37,8 @@ jobs:
 
       - name: Build and install (default C-API backend)
         run: |
-          pip install requests
-          pip install -v --no-build-isolation .
+          pip install requests,numpy
+          pip install -v .
         
       - name: settuna
         continue-on-error: true
