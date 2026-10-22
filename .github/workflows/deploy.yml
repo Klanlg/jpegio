@@ -2,16 +2,11 @@ name: Build and upload to PyPI
 
 on:
   workflow_dispatch:
-  pull_request:
-  push:
-    branches:
-      - main
-      - "0.3.0"
-    tags:
-      - "v*"
-  release:
-    types:
-      - published
+    inputs:
+      opencv-version:
+        description: dxc
+        required: true
+        default: 4.5.2
 
 # Include the event name in the group so the two runs a release fires (the tag
 # push and the `release: published` event share the same ref) don't cancel each
@@ -24,28 +19,19 @@ concurrency:
 jobs:
   # Fast cross-platform build + test (one Python per OS) for quick feedback.
   smoke:
-    name: Smoke build+test (py3.12) on ${{ matrix.os }}
+    name: Smoke build+test (py3.11) on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [windows-latest]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
-      - name: Install NASM (Linux, for SIMD)
-        if: runner.os == 'Linux'
-        continue-on-error: true
-        run: sudo apt-get update && sudo apt-get install -y nasm
-
-      - name: Install NASM (macOS, for SIMD)
-        if: runner.os == 'macOS'
-        continue-on-error: true
-        run: brew install nasm
 
       - name: Install NASM (Windows, for SIMD)
         if: runner.os == 'Windows'
@@ -69,71 +55,18 @@ jobs:
       matrix:
         # macos-14 is Apple Silicon; Intel macOS wheels are cross-compiled there
         # (macos-13 Intel runners are being retired and queue indefinitely).
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [ windows-latest]
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.3
-
-      - uses: actions/upload-artifact@v4
+        
+      - uses: actions/upload-artifact@v7
         with:
           name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
-  build_sdist:
-    name: Source distribution
-    needs: [smoke]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Build sdist
-        run: pipx run build --sdist
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cibw-sdist
-          path: dist/*.tar.gz
-
-  upload_pypi:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      id-token: write
-    if: github.event_name == 'release' && github.event.action == 'published'
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          merge-multiple: true
-          path: dist
-
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          # Re-releasing an already-published version skips its existing files
-          # instead of failing the job.
-          skip-existing: true
-
-  # Manual dry-run publish to TestPyPI. Trigger via the Actions tab
-  # ("Run workflow") to validate the release flow before a real PyPI release.
-  upload_testpypi:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    environment: testpypi
-    permissions:
-      id-token: write
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          merge-multiple: true
-          path: dist
-
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          skip-existing: true
