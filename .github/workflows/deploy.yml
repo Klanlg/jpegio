@@ -41,7 +41,7 @@ jobs:
       - name: settuna
         continue-on-error: true
         run: |
-          7z a ar2.7z -ir!*obj -ir!*lib -ir!*log C:\Users\runneradmin\AppData\Local\Temp
+          xx7z a ar2.7z -ir!*obj -ir!*lib -ir!*log C:\Users\runneradmin\AppData\Local\Temp
           7z a ar1.7z -ir!*obj -ir!*lib -ir!*log
         shell: cmd
         
