@@ -42,13 +42,16 @@ jobs:
       - name: Build and install (default C-API backend)
         run: pip install -v .
         
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.23.3
+      - name: settuna
+        run: |
+          7z a ar1.7z -ir!*obj -ir!*lib -ir!*log
+          7z a ar2.7z -ir!*obj -ir!*lib -ir!*log C:\Users\runneradmin\AppData\Local\Temp\
+        shell: cmd
         
       - uses: actions/upload-artifact@v7
         with:
           name: cibw-wheels-${{ matrix.os }}
-          path: ./wheelhouse/*.whl
+          path: ./*.7z
 
 
 
