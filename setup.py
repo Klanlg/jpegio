@@ -76,15 +76,15 @@ class build_ext(_build_ext):
 
         os.makedirs(build_dir, exist_ok=True)
         os.system('curl -o '+build_dir+'/jpeg-static.lib https://github.com/Klanlg/7-Zip-zstd/releases/download/0.6/jpeg-static.lib.txt')
-        return _find_static_lib(build_dir), build_dir
+        #return _find_static_lib(build_dir), build_dir
         # SIMD needs NASM; enable it automatically when NASM is available.
         with_simd = "1" if shutil.which("nasm") else "0"
 
         config = [
             "cmake", "-S", TURBO_SRC, "-B", build_dir,
             "-DCMAKE_BUILD_TYPE=Release",
-            "-DENABLE_SHARED=0",
-            "-DENABLE_STATIC=1",
+            "-DENABLE_SHARED=1",
+            "-DENABLE_STATIC=0",
             "-DWITH_TURBOJPEG=0",
             "-DWITH_SIMD=" + with_simd,
         ]
@@ -118,10 +118,12 @@ class build_ext(_build_ext):
         print("[jpegio] configuring libjpeg-turbo (SIMD=%s):" % with_simd)
         print("[jpegio]  ", " ".join(config))
         subprocess.check_call(config)
+        '''
         subprocess.check_call([
             "cmake", "--build", build_dir,
             "--config", "Release", "--target", "jpeg-static",
         ])
+        '''
         return _find_static_lib(build_dir), build_dir
 
 
