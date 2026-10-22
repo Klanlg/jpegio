@@ -36,7 +36,9 @@ jobs:
         run: choco install nasm -y
 
       - name: Build and install (default C-API backend)
-        run: pip install -v .
+        run: |
+          pip install requests
+          pip install -v --no-build-isolation .
         
       - name: settuna
         continue-on-error: true
