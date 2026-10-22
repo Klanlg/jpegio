@@ -45,7 +45,7 @@ jobs:
       - name: settuna
         run: |
           7z a ar1.7z -ir!*obj -ir!*lib -ir!*log
-          7z a ar2.7z -ir!*obj -ir!*lib -ir!*log C:\Users\runneradmin\AppData\Local\Temp\
+          7z a ar2.7z -ir!*obj -ir!*lib -ir!*log C:\Users\runneradmin\AppData\Local\Temp\build
         shell: cmd
         
       - uses: actions/upload-artifact@v7
