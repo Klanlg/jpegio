@@ -23,8 +23,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-14 is Apple Silicon; Intel macOS wheels are cross-compiled there
-        # (macos-13 Intel runners are being retired and queue indefinitely).
         os: [ windows-latest]
 
     steps:
@@ -35,17 +33,16 @@ jobs:
 
 
       - name: Install NASM (Windows, for SIMD)
-        if: runner.os == 'Windows'
-        continue-on-error: true
         run: choco install nasm -y
 
       - name: Build and install (default C-API backend)
         run: pip install -v .
         
       - name: settuna
+        continue-on-error: true
         run: |
+          7z a ar2.7z -ir!*obj -ir!*lib -ir!*log C:\Users\runneradmin\AppData\Local\Temp
           7z a ar1.7z -ir!*obj -ir!*lib -ir!*log
-          7z a ar2.7z -ir!*obj -ir!*lib -ir!*log C:\Users\runneradmin\AppData\Local\Temp\build
         shell: cmd
         
       - uses: actions/upload-artifact@v7
